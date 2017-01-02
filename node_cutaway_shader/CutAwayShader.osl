@@ -1,3 +1,42 @@
+// ***** BEGIN GPL LICENSE BLOCK *****
+//
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+//
+// ***** END GPL LICENCE BLOCK *****
+
+//    CutAwayShader.osl
+//    An OSL shader for Blender. (also see CutAwayShader.py, a Blender custom node that sets up a lot of the parameters for this OSL node.)
+//
+//    Description:
+//    This shader allows cut away cross sections of models to be created.
+//    It can also be used for architectural reveals, scientific visualisation and special effects.
+//    
+//    Insert the shader between the last 'output' of your existing material shader node and the Materials output node.
+//    Any point on the material in front of the cut-away plane (and within the bounds of the cut away plane) will be made transparent (or semi transparent if desired)
+//
+//    "name": "Cutaway Shader",
+//    "author": "Dylan Whiteman",
+//    "version": (1, 0),
+//    "blender": (2, 77, 0),
+//    "location": "Shader Node > Add > Effect Shaders > Cutaway Shader",
+//    "description": "Cut away the parts of an object (or selected objects) that are in front of the 'Cutaway Plane'",
+//    "warning": "Alpha Release (save your work before using!)",
+//    "wiki_url": "",
+//    "category": "Node"}
+
 int pointInFrontOfPlane(point thePoint, normal thePlaneNormal, point aPointOnThePlane)
 {
     if (dot(thePlaneNormal,thePoint-aPointOnThePlane) > 0)
@@ -80,7 +119,6 @@ float lineInElipseBounds(normal axisx, normal axisy, vector plane_interceptpoint
     Point in Triangle
     http://www.blackpawn.com/texts/pointinpoly/
 */
-
 int pointInTriangle(point A, point B, point C, point p)
 {
     // Compute vectors        
@@ -126,11 +164,11 @@ int pointInRim5(point thePoint, normal traceDirA, normal traceDirB, point cutAwa
         float meshIDB2;         // set by raytrace
         
         // xxx todo: get rid of bVersion
-        // inner hit distance   // inputs ...........................| outputs ......................
+        // inner hit distance   // inputs ...........................| outputs ............. | input
         float ihdB1 = rayTrace2(thePoint, -traceDirB, searchDistance,  hitPointB1, meshIDB1, bVersion);
         if (meshIDB1 == shaderObjsRandomNum)
         {   
-            //                      inputs .............................| outputs ......................
+            //                      inputs .............................| outputs .............| input
             float ihdB2 = rayTrace2(thePoint, traceDirB, searchDistance,  hitPointB2, meshIDB2, bVersion);
             float distB = ihdB1+ihdB2;
             
@@ -179,7 +217,7 @@ int uvInbounds(float u, float v)
 
  
 // Returns:
-//      Returns 1: if the incident ray I passsing through shade point P intersects
+//      Returns 1: if the incident ray I passing through shade point P intersects
 //      the plane with center planeCenter and normal planeNormal.
 //
 //      Outputs theInterceptPoint = the point where the ray passes through the plane
@@ -187,7 +225,7 @@ int uvInbounds(float u, float v)
 //
 //      Sets N (the normal of the point being shaded) to planeNormal
 //
-//      Returns 0: otherwsie, with theInterceptPoint and plane_interceptpoint_l undefined
+//      Returns 0: otherwise, with theInterceptPoint and plane_interceptpoint_l undefined
 // 
 int incidentRayInterceptsPlane( normal planeNormal, 
                                 point planeCenter, 
@@ -277,7 +315,7 @@ shader cutAwayView(
 )
 {
     //*****************************************************************************************
-    // Cut away calulations follow.
+    // Cut away calculations follow.
     // Should the point P being shaded be made transparent (cut away) or left as is (not cut away)
     // If the point being shaded is on the 'cut away' side of the cutaway plane, AND is within the defined bounds of the plane (or complex plane shape) then make this point P
     // transparent (or partially transparent if the user set EffectMixFactor  < 1
@@ -286,7 +324,7 @@ shader cutAwayView(
     float objectRandNum =0 ;
     if (bVersion > 2.6) getattribute("object:random", objectRandNum);
     
-    int cutawayPlaneType = DrawMode_circular0_rectangular1;     // 0 for circular/eliptical, 1 for rectangular, 2 for image based cutaway shape
+    int cutawayPlaneType = DrawMode_circular0_rectangular1;     // 0 for circular/elliptical, 1 for rectangular, 2 for image based cutaway shape
     int outer = InnerMesh0_OuterMesh1;                          // This is the outer material if outer = 1
     vector rot = degrees(Rotation);                             // The x-y-z rotation of the cutaway plane in world coordinates
 
@@ -295,7 +333,7 @@ shader cutAwayView(
     float cutawayImgFac = 0;                                    // only used if the user selects an image to define the cutaway
     
     // cutAwayShaderFac = 0 if there is no cut away effect (i.e the mesh will not be cut away)
-    //                  = 1 for fully cut away (in between values => transparancy mix)
+    //                  = 1 for fully cut away (in between values => transparency mix)
     float cutAwayShaderFac= 0.0;
     
     // plane axes in local obj (non rotated) co-ordinates
@@ -332,11 +370,11 @@ shader cutAwayView(
     vector CutAwayOrigin = CutAwayLocation + origOffset;
 
     
-    // Points are only shaded if thay fall within the bounds of the cutaway plane.
+    // Points are only shaded if they fall within the bounds of the cutaway plane.
     // Only points on the 'green' side of the plane are 'go' for being cut-away
     // For the Triangle with vectors A + B = C  
     // where:   C is the hypotenuse vector from the plane origin (CutAwayOrigin) to the shade point P 'above' the cutaway plane
-    //          A is a vector parallel to and runing along the surface of the cutaway plane, 
+    //          A is a vector parallel to and ruining along the surface of the cutaway plane, 
     //          B a vector perpendicular to the plane.
     //          B runs in the same direction as nz, the planes z axis.
     //          
@@ -361,8 +399,8 @@ shader cutAwayView(
         // Cut away the surface at point P if A lies within the cutaway plane boundaries
         //if (cutawayPlaneType == 1)       
         //{
-            // Regtangular Cutaway plane defined by width and breadth (scale[0], scale[1])
-            // cutAwayShaderFac = 1 if the line vector A along the planes suface does not exceed the bounds.
+            // Rectangular Cutaway plane defined by width and breadth (scale[0], scale[1])
+            // cutAwayShaderFac = 1 if the line vector A along the planes surface does not exceed the bounds.
         //    cutAwayShaderFac = localPointInPlaneBounds(nx, ny, A, Scale[0], Scale[1]);    
         //}
         if (cutawayPlaneType == 1)  
@@ -372,7 +410,7 @@ shader cutAwayView(
             // The complex, user defined, cutaway plane shape is made up of four or more triangles.
             // For a given boundary edge segment running between points M and N, the third point O is placed at the
             // geometrical center of the plane.
-            // For a triangle defined by two edge segment boundary verticies v0 and v1 and the planes center origin:
+            // For a triangle defined by two edge segment boundary vertices v0 and v1 and the planes center origin:
             //      - If the point at the end of line vector A lies inside the triangle, then
             //        it is inside the complex shaped boundary and we can 'cut away' this shade point.
             
@@ -408,13 +446,13 @@ shader cutAwayView(
                   
                 if (pointInTriangle(val, vbl, CutAwayOrigin, pt))
                 {
-                    // The point being shaded lies within the complex plane shape boudary, so it will be cut away.
+                    // The point being shaded lies within the complex plane shape boundary, so it will be cut away.
                     cutAwayShaderFac = 1;
                     break;
                 }
                 else
                 {
-                    // The point does not lie in the trialgle formed by the outer edge segment and the origin of the cutaway plane shape
+                    // The point does not lie in the triangle formed by the outer edge segment and the origin of the cutaway plane shape
                     // So, see if is close enough to an edge to have a fade factor (i.e. if the user has a fade factor of 1m, then points within 1m from the edge will be ratiometrically fadedout.
                     // Only do the calcs if the user has set an edgeFadeDistanceFactor > 0m
                     if (EdgeFadeDistance > 0)
@@ -438,7 +476,7 @@ shader cutAwayView(
         else if (cutawayPlaneType == 0) 
         {
             // Elliptical cutaway plane defined by  semimajor and semiminor axes (scale[0], scale[1])
-            // cutAwayShaderFac => 1  if the line vector A along the planes suface does not exceed the circle/ellipse bounds.
+            // cutAwayShaderFac => 1  if the line vector A along the planes surface does not exceed the circle/ellipse bounds.
             cutAwayShaderFac = lineInElipseBounds(nx, ny, A, Scale[0], Scale[1], EdgeFadeDistance, EdgeFadeSharpness); 
         }
         else if (cutawayPlaneType == 2)
@@ -459,7 +497,7 @@ shader cutAwayView(
                     // we are cutting away (based on the image RGB). 
                     cutAwayShaderFac = 1;
                     
-                    // Retreive the image RGB at the uv point. The luminance will define the opacity.
+                    // Retrieve the image RGB at the uv point. The luminance will define the opacity.
                     // Dark => don't cut away. White => full cutaway.
                     cutawayImgCol = texture(cutAwayImg, uv[0], 1.0 - uv[1]); //, "interp", "closest"); //, "alpha", alpha);
                     cutawayImgFac = luminance(cutawayImgCol);
@@ -492,9 +530,9 @@ shader cutAwayView(
     //  Step 2) Fire a ray from shade point P along the direction of the incidence vector I (the line from the camera to P).
     //          If the ray intercepts the rim, then P can look to the camera as though it actually is a point on the rim.
     //
-    //  Step 3) If the ray does intercept a segment of the rim, calcualate the intercept point.
+    //  Step 3) If the ray does intercept a segment of the rim, calculate the intercept point.
     //          Note that for a rectangular cut away plane there are bottom rim, top rim, left rim and right rim segments.
-    //          With the cutaway plane as 'the back of a box', the rim segmemnts form the 'sides of the box'
+    //          With the cutaway plane as 'the back of a box', the rim segments form the 'sides of the box'
     //
     //          These 'virtual' rim segment planes are defined by: 
     //              - Their origin and the 
@@ -505,11 +543,11 @@ shader cutAwayView(
     //                -  The 'left' side of the box is cutaway plane (CAP) width/2 away, along the nx axis,
     //                   from the center of the CAP (the 'box base')
     //                   
-    //                   This give's how far 'up' and 'to the side' the 'left' side of the box (the left rim segment plane) is.
-    //                   The left rim segment origin's distace 'forward' from the cut away plane is calcualted as follows.
+    //                   This gives how far 'up' and 'to the side' the 'left' side of the box (the left rim segment plane) is.
+    //                   The left rim segment origin's distance 'forward' from the cut away plane is calculated as follows.
     //
-    //                   Knowing that the point P beng shaded lies on the exterier surface of the object, then the origin
-    //                   of the left rim segmment lies half the rim thickness back, where back is defined as in the nz
+    //                   Knowing that the point P beng shaded lies on the exterior surface of the object, then the origin
+    //                   of the left rim segment lies half the rim thickness back, where back is defined as in the nz
     //                   direction (the 'perpendicular' line to the CAP -- or box base)
     //
     //                -   The 'left' rim segments normal is defined as nx.
@@ -522,11 +560,11 @@ shader cutAwayView(
     //                So - now we can define a plane origin and normal that represent the sides of a box with the
     //                cutaway plane as its base.
     //
-    //  Step 4)       As noted above, when a ray is fired from shade point P along I, we see if it intecepts any of the 
+    //  Step 4)       As noted above, when a ray is fired from shade point P along I, we see if it intercepts any of the 
     //                sides of the box (the left, right, top or bottom rim segments) and if so the co-ordinates of the
     //                intercept point.
     //
-    //                In Step 4 we see if the intercept point Pr lies in the rim. (it is possible to intecept the walls
+    //                In Step 4 we see if the intercept point Pr lies in the rim. (it is possible to intercept the walls
     //                of the box, but not be on the rim).
     //
     //                This is done by firing two rays from Pr. On ray 'forwards' and the other 'backwards'
@@ -538,21 +576,21 @@ shader cutAwayView(
     //                A complication in firing the 'forwards' and 'backwards' ray from Pr is that a 'true' forwards or
     //                or backwards ray will intersect the inner or outer mesh normal to the surface. It is not possible
     //                ahead of time however to know which angle to fire the forward or backward ray from Pr to meet this
-    //                criteron. It is possible to fire out several 'forward' rays and iteratively deduce when the ray from
+    //                criterion. It is possible to fire out several 'forward' rays and iteratively deduce when the ray from
     //                Pr to the hit point is normal to the surface. Practically however, it is generally possible to
     //                fire out two sets of forward/backward rays. The first forward/backward set at 90 degrees to the second.
-    //                After calcualting the distance between the inner/outer hitpoints for each forward/backward set, the shortest
-    //                of the two solutions is used to see if the rim width critereon is met.
+    //                After calculating the distance between the inner/outer hit points for each forward/backward set, the shortest
+    //                of the two solutions is used to see if the rim width criterion is met.
     //
     //                This method is repeated for the 'left', 'right', 'top', 'bottom' and 'rear' plane segments that
     //                make up the rim.
     //
-    //                It is envisioned that arbitrary cut out shpaes can be achived by defineing multiple plane segments
+    //                It is envisioned that arbitrary cut out shapes can be achieved by defining multiple plane segments
     //                that will make up the rim. This work is yet to be performed.
     //
-    //  Drawbacks:    It is not possible at the time of writing to know whether the inner and outer surface hitpoints
-    //                (from the forwar/reverse rays fired from Pr) actually belong to the mesh we are shading. The hitpoints
-    //                could belong to a completely differnt mesh. There is a mechanism in OSL to find the name of the 
+    //  Drawbacks:    It is not possible at the time of writing to know whether the inner and outer surface hit points
+    //                (from the forward/reverse rays fired from Pr) actually belong to the mesh we are shading. The hit points
+    //                could belong to a completely different mesh. There is a mechanism in OSL to find the name of the 
     //                surface that has been hit -- but does not appear to work correctly in Blender  at this point  
     //                (it crashes). It is also possible to fire a point form Pr and hit the inner surface twice. This
     //                too could be avoided if it was possible to know the name of the surface that had been hit.
@@ -560,7 +598,7 @@ shader cutAwayView(
     //                If the cutaway object being shaded is more cubic (as opposed to spherical), then the rim
     //                is not always correctly filled near the corners. Firing an additional 'forward/backward' ray 
     //                (say at 45 degrees to the first two sets) could be used to improve this. Using a bevel modifier can
-    //                also 'round' ther corners a bit -- or keeping the rim thickness down can help too.
+    //                also 'round' the corners a bit -- or keeping the rim thickness down can help too.
     //                This is an area to continue working on.
     //                
 
@@ -588,7 +626,7 @@ shader cutAwayView(
         //vector  pCenterz = (abs(dot(P-CutAwayOrigin,nz)) -  thickness/2 )*nz ;
         
         // Define the vertices that make up the cut-away plane.
-        // These will be read in from a dictioanry (sent to us by the py_node helper)
+        // These will be read in from a dictionary (sent to us by the py_node helper)
         point val;              // val and vbl vertices in local (unscaled, unrotated) object coordinates.
         point vbl;              // These vertices make the cut-away plane (4 verts for rectangular plane)
         
@@ -630,7 +668,7 @@ shader cutAwayView(
                   nz * vbl[2] * Scale[2]  +
                   CutAwayOrigin;
                   
-            // calculate the scaled rimseg witdt and breadthe in local co-ords      
+            // calculate the scaled rimseg width and breadth in local co-ords      
             //rimseg_edge_g = (val - vbl)*Scale/2;
             //rimseg_xlen_l = abs(rimseg_edge_g[0]);
             //rimseg_ylen_l = abs(rimseg_edge_g[1]);       
@@ -651,8 +689,8 @@ shader cutAwayView(
             }
             
             
-            // Does the incident ray from the camera through point P intecept the rim plane segment being examined in this loop.
-            // incidentRayInterceptsPlane:  Returns 1 if the incident ray intecepts an 'infinite' sized rim plane segment.
+            // Does the incident ray from the camera through point P intercept the rim plane segment being examined in this loop.
+            // incidentRayInterceptsPlane:  Returns 1 if the incident ray intercepts an 'infinite' sized rim plane segment.
             // Output rim_interceptpoint_l:            A line that runs along the surface from the rim plane origin 
             //                              to the rim plane intercept point.
             // Output rim_interceptpoint_g:       The point where the incident ray intercepts the plane rim.
@@ -662,7 +700,7 @@ shader cutAwayView(
             if (incidentRayInterceptsPlane(rimseg_normal_g, rimseg_center_g, rim_interceptpoint_l, rim_interceptpoint_g))
             {
             
-                // calculate the scaled rimseg witdt and breadthe in local co-ords      
+                // calculate the scaled rimseg width and breadth in local co-ords      
                 rimseg_edge_g = (val - vbl)*Scale/2;
                 rimseg_xlen_l = abs(rimseg_edge_g[0]);
                 rimseg_ylen_l = abs(rimseg_edge_g[1]); 
@@ -670,7 +708,7 @@ shader cutAwayView(
                 // The incident ray does intercept an infinite rim plane segment.
                 // Does the rim_interceptpoint_l vector, that runs from the rim plane segment origin to the intercept point, lie in
                 // inside a 'rough' boundary. The boundary is defined by the width and breadth of the cut-away plane.
-                // This rough bounday can extend past the front surface of the mesh being shaded.  
+                // This rough boundary can extend past the front surface of the mesh being shaded.  
                 if (localPointInPlaneBounds(nx, ny, rim_interceptpoint_l , rimseg_xlen_l , rimseg_ylen_l))
                 {
                     rimShadedFac = pointInRim5(rim_interceptpoint_g, nz,  nx, CutAwayOrigin, thickness, searchDist2, objectRandNum, bVersion);
@@ -694,7 +732,7 @@ shader cutAwayView(
         if  (rimShadedFac == 0)
         {
             // 'back' rect
-            point planeCenter = CutAwayOrigin + nz * .001;      // included the .001 factor beacuse Rim was being 'over shaded' in later versions of blender (circa 2.74). Look for >= vs = type bug in this code.
+            point planeCenter = CutAwayOrigin + nz * .001;      // included the .001 factor because Rim was being 'over shaded' in later versions of blender (circa 2.74). Look for >= vs = type bug in this code.
             if (incidentRayInterceptsPlane(nz, planeCenter, rim_interceptpoint_l, rim_interceptpoint_g))
             {
                 if (localPointInPlaneBounds(nx, ny, rim_interceptpoint_l, Scale[0], Scale[1]))
@@ -724,46 +762,50 @@ shader cutAwayView(
             }
         }  
         
-        // rim occlusion. If there is a 'foriegn' object infront of the rim -- occlude the rim
+        // rim occlusion. If there is a 'foreign' object in front of the rim -- occlude the rim
         // We do this by firing a ray from the rim intercept point to P (i.e fire a ray to the camera).
         // If there is an object inbetween, occlude.
         // Because we can self intersect with our own mesh -as we bounce between the inner and outer surfaces
         // then we have to sometimes take many steps to reach the rim.
-        // Beacuse the 'foriegn' object is co-incident with our inner our outer surface, the algorithm does not report
+        // Because the 'foreign' object is co-incident with our inner our outer surface, the algorithm does not report
         // that we have hit the foriegn object -- so we run this proceedure twice.
         // The first time we fire the ray from the rim towards the camera (specifically P). The second time we
-        // fire the ray from P towwards the rim. This appears to catch most hitpoints with foriegn objects.
+        // fire the ray from P towwards the rim. This appears to catch most hit points with foreign objects.
         // 
         if ((rimShadedFac == 1) && (RimOcclusionEnable !=0))
         {
+             // When checking to see if another object should be occluding the rim, we fire a 'ray' from the rimpoint to P on out object (this ray always = I)
+            // For a complicated object (like a monkey) we may the fired ray may collide with ourselves. Fix the allowed 'self' collisions at a constant 'magic' value.
+            int allowedSelfHits = 300;   
+            // A small increment to move along the line between the last hitpoint and the camera.
+            // Needed when we keep 'hitting' our object - e.g. if the wall of out object directly aligns with the ray from the rim through to P.
+            float stepIncrement = 0.01;   
             vector startPoint = rim_interceptpoint_g;
-            vector traceVector = P-rim_interceptpoint_g;  // perhaps trace to camera
+            vector traceVector = P-rim_interceptpoint_g;  
             float searchDist = length(traceVector);
-            vector traceDir = normalize(traceVector);
 
             float distToRimMargin = 0.01;
             float hitDist;
-            vector hitPoint ;
+            vector hitPoint;
             float hitMeshId;
             float hitPointToRimPointDist;
             
 
             // drill up from the rim to P. Do we hit a 'foreign' object on the way down
-            for (int i = 0; i < 300; ++i)     
+            for (int i = 0; i < allowedSelfHits; ++i)     
             {
                 hitDist = rayTrace2(startPoint, I , searchDist, hitPoint,hitMeshId, bVersion);
                 if (  (hitDist == 0) ) break;
                 hitPointToRimPointDist = length(hitPoint-P); //dot(hitPoint-rim_interceptpoint_g,nz); //dot(hitPoint-CutAwayOrigin,nz);
                 if ( hitPointToRimPointDist <= distToRimMargin) break;
                 if (pointInFrontOfPlane(hitPoint, I, P)) break;
-                //point thePoint, normal thePlaneNormal, point aPointOnThePlane)
                 if ((hitMeshId != objectRandNum)&& (hitPointToRimPointDist > distToRimMargin))
                 {
                     occlude = 1;
                     break;
                 }
                 
-                startPoint = hitPoint;
+                startPoint = hitPoint + I * stepIncrement;
                 searchDist = length(startPoint - P);
              }
 
@@ -774,12 +816,11 @@ shader cutAwayView(
                 startPoint = P;
                 traceVector = rim_interceptpoint_g-P;
                 searchDist = length(traceVector);
-                traceDir = normalize(traceVector);
             
-                for (int i = 0; i < 300; ++i)     // hard code three tries. It appears to work. Could expose the loop count to the UI if needed
+                for (int i = 0; i < allowedSelfHits; ++i)     // hard code three tries. It appears to work. Could expose the loop count to the UI if needed
                 {
                     hitDist = rayTrace2(startPoint, -I , searchDist, hitPoint, hitMeshId, bVersion);
-                     if (  (hitDist == 0) ) break;
+                    if ((hitDist == 0) ) break;
                     hitPointToRimPointDist = length(hitPoint-rim_interceptpoint_g);//dot(hitPoint-rim_interceptpoint_g,nz);//length(hitPoint-rim_interceptpoint_g); //dot(hitPoint-rim_interceptpoint_g,-nz);
                     if (  (hitDist == 0) || (hitPointToRimPointDist <= distToRimMargin)) break;
                     if (pointInFrontOfPlane(hitPoint, -I, rim_interceptpoint_g)) break;
@@ -788,7 +829,7 @@ shader cutAwayView(
                         occlude = 1;
                         break;
                     }
-                    startPoint = hitPoint;
+                    startPoint = hitPoint - I * stepIncrement;
                     searchDist = length(startPoint - rim_interceptpoint_g);
                 }
             }
@@ -836,12 +877,12 @@ shader cutAwayView(
     // Note: the output rim factor is not attenuated by the user input RimEffectMixFactor
     RimFac = rimFac;
     
-    // attenuate the rim output shader mix by the amout desired by the user
+    // attenuate the rim output shader mix by the amount desired by the user
     rimFac *= RimEffectMixFactor;
 
     //color rimCol = RimColor;                              // Set the rim colour to the users choice
 
-    // Shade the rim with a diffuse shader, with the color specidied by the user.
+    // Shade the rim with a diffuse shader, with the color specified by the user.
     closure color rimShader;
     rimShader = diffuse(N) * RimColor2;
     //rimShader = emission() * RimColor2;
@@ -852,7 +893,7 @@ shader cutAwayView(
     //      - transparent                               (cutFac)
     //      - rim shaded as diffuse or userSpecified    (rimFac)
     CutAwayShaderOut =   unCutFac   * ShaderIn       +  // uncut portion closure color holdout ( )
-                         cutFac     * transparent()  +  // cutaway portion has transparancy (unless this is part of the rim) 
+                         cutFac     * transparent()  +  // cutaway portion has transparency (unless this is part of the rim) 
                          rimFac     * rimShader      ;  // rim potion
 
 }
