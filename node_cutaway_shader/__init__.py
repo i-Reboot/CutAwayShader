@@ -20,7 +20,7 @@
 bl_info = {
     "name": "Cutaway Shader",
     "author": "Dylan Whiteman",
-    "version": (1, 0),
+    "version": (1, 1),
     "blender": (2, 77, 0),
     "location": "Shader Node > Add > Effect Shaders > Cutaway Shader",
     "description": "Cut away the parts of an object (or selected objects) that are in front of the 'Cutaway Plane'",
@@ -1622,25 +1622,6 @@ class CutAwaySetupNode(Node):
         return center         
     # < !Edge Index Slider > 
 
-
-    # < Rim Fill check box >
-    # Define props with callbacks
-    # The Fill Rim toggle button has been pressed
-    def fillRimUpdate(self, context):
-        oslNode = self.id_data.nodes[self.osl_nodename_str]      # id_data represents treenode
-        if (self.fillRim_bool_prop):
-            oslNode.inputs["RimFillEnable"].default_value = 1
-        else:
-            oslNode.inputs["RimFillEnable"].default_value = 0  
-    
-    # Check box to select "fill cutaway with a rim" 
-    fillRim_bool_prop = bpy.props.BoolProperty( 
-        name="Fill Rim",
-        description="Draw the rim fill between the outer and inner mesh.",
-        default = False,
-        update=fillRimUpdate)
-    # <! Rim Fill check box !>                                                                                        
-     
     
     # < Rim Occlusion Enable check box >                                        
     # Check box to select "Rim Occlusion Enable" : Handler  
@@ -1796,6 +1777,62 @@ class CutAwaySetupNode(Node):
     rimeffectmix_float_last_frame_value = rimeffectmix_float;
     # <! Rim Effect Mix Factor Slider >
     
+    # <! RIM emmission or diffuse shader drop down box >                                                       
+    def upDateRimShadeModeEnums(self, context):
+        # calculate the current selection index from the 'dropdown enumeration box'
+        indexInt = 1-eval(self.rim_shader_mode_enum) - 1
+
+        theSelection = self.rim_shader_items[indexInt][1]
+        oslNode = self.id_data.nodes[self.osl_nodename_str]
+        if (theSelection == 'No Rim Drawn'):
+              #oslNode.inputs["DrawMode_circular0_rectangular1"].default_value = 1
+              #self.rectangular_circular_int = 1 
+              oslNode.inputs["RimFillEnable"].default_value = 0
+              self.fillRim_bool_prop = False;
+              
+        elif (theSelection == 'Emission Rim Shader'):
+              #oslNode.inputs["DrawMode_circular0_rectangular1"].default_value = 0
+              #self.rectangular_circular_int = 0    
+              oslNode.inputs["RimFillEnable"].default_value = 1
+              self.fillRim_bool_prop = True
+              
+        elif (theSelection == 'Diffuse Rim Shader'):
+              #oslNode.inputs["DrawMode_circular0_rectangular1"].default_value = 2
+              #oslNode.inputs["cutAwayImg"].default_value = self.cutaway_image_path_and_name_str
+              #self.rectangular_circular_int = 2 
+              oslNode.inputs["RimFillEnable"].default_value = 10
+              self.fillRim_bool_prop = True
+        
+        #self.update_child_node_rect_circular_settings()
+
+              
+    # The state of the selection is saved if the blend file is saved (because properties are saved)
+    rim_shader_items = (('3', 'Diffuse Rim Shader', ''), ('2', 'Emission Rim Shader', ''), ('1', 'No Rim Drawn', ''))
+    rim_shader_mode_enum = bpy.props.EnumProperty(
+        name = "Rim Shader Type", 
+        description = "The shader used to draw the rim", 
+        items = rim_shader_items,
+        default="2",
+        update = upDateRimShadeModeEnums)
+    # <! RIM emmission or diffuse shader drop down boxdrop down box>
+    
+        # < Rim Fill check box >
+    # Define props with callbacks
+    # The Fill Rim toggle button has been pressed
+    def fillRimUpdate(self, context):
+        oslNode = self.id_data.nodes[self.osl_nodename_str]      # id_data represents treenode
+        if (self.fillRim_bool_prop):
+            oslNode.inputs["RimFillEnable"].default_value = 1
+        else:
+            oslNode.inputs["RimFillEnable"].default_value = 0  
+    
+    # Check box to select "fill cutaway with a rim" 
+    fillRim_bool_prop = bpy.props.BoolProperty( 
+        name="Fill Rim",
+        description="Draw the rim fill between the outer and inner mesh.",
+        default = True) #,
+        #update=fillRimUpdate)
+    # <! Rim Fill check box !>    
 
     # --------------------------------------------------------------------------------------------
     # --------------------------------------------------------------------------------------------
@@ -3975,11 +4012,15 @@ class CutAwaySetupNode(Node):
                 "Solidify Active Object",
                 icon = "MATERIAL").setupnode_namestr_aismam = self.py_nodename_str  
             
-            # Enable Rim Fill Checkbox
+            layout.separator()
+            
+            # Rim Fill Drawing Options
             row = layout.row(align=False)
             row.enabled = self.rectangular_circular_int == 1  
-            row.label("") 
-            row.prop(self, "fillRim_bool_prop", "Enable Rim Fill")  
+            #row.label("") 
+            #row.prop(self, "fillRim_bool_prop", "Enable Rim Fill")   
+            row.label("Rim Drawing Options") 
+            row.prop(self, "rim_shader_mode_enum", "") 
             
             enable_rim_fill_options_bool = self.fillRim_bool_prop and is_parent and self.rectangular_circular_int == 1 
             
