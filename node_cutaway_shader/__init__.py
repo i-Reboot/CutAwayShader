@@ -25,7 +25,7 @@ bl_info = {
     "location": "Shader Node > Add > Effect Shaders > Cutaway Shader",
     "description": "Cut away the parts of an object (or selected objects) that are in front of the 'Cutaway Plane'",
     "warning": "Alpha Release (save your work before using!)",
-    "wiki_url": "",
+    "wiki_url": "http://blendbits.blogspot.com.au/2017/02/the-cutaway-shader-free-blender-add-on.html",
     "category": "Node"}
     
 import bpy
