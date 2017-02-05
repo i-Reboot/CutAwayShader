@@ -20,7 +20,7 @@
 bl_info = {
     "name": "Cutaway Shader",
     "author": "Dylan Whiteman",
-    "version": (1, 1),
+    "version": (1, 2),
     "blender": (2, 77, 0),
     "location": "Shader Node > Add > Effect Shaders > Cutaway Shader",
     "description": "Cut away the parts of an object (or selected objects) that are in front of the 'Cutaway Plane'",
@@ -1812,7 +1812,7 @@ class CutAwaySetupNode(Node):
         name = "Rim Shader Type", 
         description = "The shader used to draw the rim", 
         items = rim_shader_items,
-        default="2",
+        default="1",
         update = upDateRimShadeModeEnums)
     # <! RIM emmission or diffuse shader drop down boxdrop down box>
     

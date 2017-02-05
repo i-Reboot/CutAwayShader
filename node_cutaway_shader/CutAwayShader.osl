@@ -29,7 +29,7 @@
 //
 //    "name": "Cutaway Shader",
 //    "author": "Dylan Whiteman",
-//    "version": (1, 1),
+//    "version": (1, 2),
 //    "blender": (2, 77, 0),
 //    "location": "Shader Node > Add > Effect Shaders > Cutaway Shader",
 //    "description": "Cut away the parts of an object (or selected objects) that are in front of the 'Cutaway Plane'",
